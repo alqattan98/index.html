@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Rotation Schedule – Farwaniya</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{
+  --navy:#1a2a5e;--red:#c0392b;--green:#1e8449;
+  --teal:#0e6655;--purple:#6c3483;--orange:#d68910;
+  --border:#c8d6e8;--bg:#dde3f0;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{font-family:'Montserrat',sans-serif;background:var(--bg);min-height:100vh;overflow-x:hidden}
+
+/* SCREENS */
+.screen{display:none;flex-direction:column;min-height:100vh}
+.screen.active{display:flex}
+
+/* SETUP HEADER */
+.setup-header{background:var(--navy);padding:16px 18px;display:flex;align-items:center;gap:12px;flex-shrink:0}
+.hdr-logo{width:40px;height:40px;background:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.hdr-title{color:#fff;font-size:16px;font-weight:800;line-height:1.2}
+.hdr-sub{color:#8faad8;font-size:11px;font-weight:500;margin-top:2px}
+
+.setup-body{flex:1;padding:14px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* CARDS */
+.card{background:#fff;border-radius:14px;margin-bottom:12px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.07)}
+.card-hdr{background:var(--navy);padding:11px 16px;font-size:12px;font-weight:800;color:#fff;text-transform:uppercase;letter-spacing:.8px}
+.card-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+
+/* INPUTS */
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.flabel{font-size:11px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;display:block}
+input[type=text],input[type=number],select{
+  width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:10px;
+  font-family:'Montserrat',sans-serif;font-size:15px;font-weight:600;color:var(--navy);
+  outline:none;-webkit-appearance:none;appearance:none;background:#fff;
+}
+input:focus,select:focus{border-color:var(--navy)}
+
+/* RESIDENTS */
+.res-card{background:#f8f9fd;border:2px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px}
+.res-row1{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.res-name{flex:1;padding:11px 12px;border:2px solid var(--border);border-radius:8px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:600;color:var(--navy);outline:none}
+.res-row2{display:flex;gap:8px;align-items:center}
+.res-level{flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:600;color:var(--navy);outline:none;-webkit-appearance:none;background:#fff}
+.color-pick{width:44px;height:44px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--border);overflow:hidden;flex-shrink:0;position:relative;cursor:pointer}
+.color-pick input{position:absolute;inset:-4px;width:calc(100%+8px);height:calc(100%+8px);border:none;padding:0;cursor:pointer;opacity:0}
+.del-btn{width:40px;height:40px;border:none;border-radius:50%;background:#fce4ec;color:var(--red);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-weight:700}
+
+/* ADD BUTTON */
+.add-btn{width:100%;padding:13px;border:2px dashed var(--green);border-radius:10px;background:#e8f5e9;color:var(--green);font-family:'Montserrat',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:2px}
+
+/* CONSULT */
+.consult-row{display:flex;align-items:center;gap:10px;background:#f0f4ff;border-radius:10px;padding:10px 12px;margin-bottom:8px}
+.wk-badge{background:var(--navy);color:#fff;font-size:11px;font-weight:800;padding:5px 11px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+.consult-row input{flex:1;padding:10px 12px;border:2px solid var(--border);border-radius:8px;font-family:'Montserrat',sans-serif;font-size:14px;font-weight:600;color:var(--navy);outline:none}
+
+/* SPECIALS */
+.sp-card{background:#f8f9fd;border:2px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px;display:flex;flex-direction:column;gap:8px}
+.sp-row{display:flex;gap:8px;align-items:center}
+.sp-date{width:72px;flex-shrink:0;padding:11px 10px;text-align:center;border:2px solid var(--border);border-radius:8px;font-family:'Montserrat',sans-serif;font-size:15px;font-weight:700;color:var(--navy);outline:none}
+.sp-type{flex:1;padding:11px 12px;border:2px solid var(--border);border-radius:8px;font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;color:var(--navy);outline:none;-webkit-appearance:none;background:#fff}
+.sp-teacher{display:none}
+.sp-teacher.show{display:block}
+
+/* RULE NOTE */
+.rule-note{background:#fff8e1;border:2px solid #ffd54f;border-radius:10px;padding:12px;font-size:12px;color:#6d4c00;line-height:1.8;margin-top:4px}
+.rule-note strong{display:block;font-size:13px;margin-bottom:4px}
+
+/* GENERATE */
+.gen-btn{width:100%;padding:17px;background:var(--navy);color:#fff;border:none;border-radius:14px;font-family:'Montserrat',sans-serif;font-size:17px;font-weight:800;cursor:pointer;box-shadow:0 4px 20px rgba(26,42,94,.4);margin-bottom:20px;letter-spacing:.3px}
+
+/* SCHEDULE SCREEN TOOLBAR */
+.sch-toolbar{background:var(--navy);padding:10px 14px;display:flex;align-items:center;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.tb-btn{padding:9px 16px;border:none;border-radius:8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer}
+.tb-back{background:rgba(255,255,255,.15);color:#fff}
+.tb-png{background:#27ae60;color:#fff}
+.tb-pdf{background:var(--red);color:#fff}
+.tb-print{background:rgba(255,255,255,.9);color:var(--navy)}
+
+.res-switcher{background:#fff;padding:10px 14px;display:flex;gap:8px;overflow-x:auto;border-bottom:2px solid var(--border);flex-shrink:0;-webkit-overflow-scrolling:touch}
+.res-switch-btn{padding:9px 18px;border:2px solid var(--border);border-radius:20px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;cursor:pointer;background:#fff;white-space:nowrap;flex-shrink:0}
+
+.stats-row{display:flex;gap:8px;padding:10px 14px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.stat-chip{border-radius:20px;padding:6px 14px;font-size:11px;font-weight:700;border:2px solid;white-space:nowrap;flex-shrink:0;background:#fff}
+
+.sch-wrap{overflow-x:auto;padding:14px;-webkit-overflow-scrolling:touch;flex:1}
+
+/* ══ SCHEDULE OUTPUT (identical to v5) ══ */
+.sch{width:1300px;background:#fff;font-family:'Montserrat',sans-serif;overflow:hidden;box-shadow:0 6px 40px rgba(0,0,0,.15);border-radius:12px}
+.sch-hdr{background:var(--navy);padding:18px 28px 16px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.sch-hdr-subtitle{font-size:11px;font-weight:700;color:#8faad8;text-transform:uppercase;letter-spacing:2px;margin-bottom:4px}
+.sch-hdr-name{font-size:30px;font-weight:900;color:#fff;letter-spacing:-.5px;display:flex;align-items:center;gap:12px;line-height:1}
+.sch-badge{background:#3a6bbf;color:#fff;font-size:14px;font-weight:800;padding:4px 12px;border-radius:6px;letter-spacing:1px}
+.sch-hdr-month{font-size:20px;font-weight:800;color:#fff;margin-top:7px;display:flex;align-items:center;gap:8px}
+.sch-logo{display:flex;align-items:center;gap:14px}
+.logo-icon{width:64px;height:64px;background:#fff;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.logo-ar{font-family:'Cairo',sans-serif;font-size:20px;font-weight:900;color:#fff;direction:rtl;line-height:1.1;text-align:right}
+.logo-en{font-size:15px;font-weight:900;color:#fff;letter-spacing:.5px;margin-top:2px;text-align:right}
+.logo-dept{font-size:10px;color:#8faad8;font-weight:500;margin-top:4px;line-height:1.5;text-align:right}
+.sch-legend{display:flex;border-bottom:3px solid var(--border);background:#fff}
+.leg-item{display:flex;align-items:center;gap:8px;padding:10px 18px;border-right:1px solid var(--border);font-size:11px;font-weight:800;white-space:nowrap}
+.leg-t{color:var(--red)}.leg-p{color:var(--red)}.leg-a{color:var(--green)}.leg-w{color:var(--teal)}.leg-l{color:var(--purple)}
+.sch-grid{display:grid;grid-template-columns:120px repeat(5,1fr);border-top:2px solid var(--border)}
+.col-hdr{background:var(--navy);color:#fff;font-weight:800;font-size:12px;text-align:center;padding:11px 4px;border-right:1px solid rgba(255,255,255,.15);letter-spacing:.8px}
+.wk-lbl{display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:10px 5px;font-size:11px;font-weight:800;border-right:2px solid var(--border);border-bottom:1px solid var(--border)}
+.wk-lbl .wn{font-size:18px}.wk-lbl .wd{font-size:10px;font-weight:500;color:#777;margin-top:3px}
+.cell{border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 12px;min-height:110px;display:flex;flex-direction:column;gap:4px;cursor:pointer}
+.cell.greyed{background:#f5f5f5!important;cursor:default}
+.day-n{font-size:16px;font-weight:800;color:var(--navy);line-height:1}
+.cell-body{display:flex;flex-direction:column;gap:5px;flex:1;justify-content:center}
+.cell-body svg{width:26px;height:26px}
+.c-clinic{font-size:17px;font-weight:700;line-height:1.2;opacity:.85}
+.c-activity{font-size:22px;font-weight:900;line-height:1.2}
+.c-doctor{font-size:22px;font-weight:900;line-height:1.2}
+.t-leave .c-activity,.t-leave .c-doctor{color:#6c3483}
+.t-academic .c-activity,.t-academic .c-doctor{color:#1e8449}
+.t-teaching .c-activity,.t-teaching .c-doctor{color:#c0392b}
+.t-presentation .c-activity,.t-presentation .c-doctor{color:#c0392b}
+.t-wards .c-activity,.t-wards .c-doctor{color:#0e6655}
+.t-eid .c-activity,.t-eid .c-doctor,.t-holiday .c-activity,.t-holiday .c-doctor{color:#d68910}
+.t-endo .c-clinic,.t-endo .c-doctor{color:#1a2a5e}
+.t-endodm .c-clinic,.t-endodm .c-doctor{color:#1a2a5e}
+.t-dm .c-clinic,.t-dm .c-doctor{color:#1a2a5e}
+.t-gdm .c-clinic,.t-gdm .c-doctor{color:#0e6655}
+.t-mix .c-clinic,.t-mix .c-doctor{color:#6c3483}
+.cb{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:12px;padding:11px 20px;font-weight:900;border-top:3px solid transparent;border-bottom:3px solid transparent}
+.cb svg{width:22px;height:22px;flex-shrink:0}
+.cb-lbl{font-size:18px;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:1px}
+.cb-name{font-size:26px;font-weight:900;letter-spacing:2px;text-transform:uppercase}
+.cb-w0{background:linear-gradient(90deg,#ede7f6,#d1c4e9,#ede7f6);color:#4a148c;border-color:#9c27b0}
+.cb-w1{background:linear-gradient(90deg,#e8f5e9,#c8e6c9,#e8f5e9);color:#1b5e20;border-color:#2e7d32}
+.cb-w2{background:linear-gradient(90deg,#e3f2fd,#bbdefb,#e3f2fd);color:#0d47a1;border-color:#1565c0}
+.cb-w3{background:linear-gradient(90deg,#fff8e1,#ffecb3,#fff8e1);color:#e65100;border-color:#f57f17}
+.cb-w4{background:linear-gradient(90deg,#fce4ec,#f8bbd0,#fce4ec);color:#880e4f;border-color:#c2185b}
+.sch-footer{background:var(--navy);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.fi{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.1);border-radius:5px;padding:4px 10px;font-size:9px;font-weight:600;color:#fff}
+.fi svg{width:13px;height:13px}
+.fv{background:rgba(255,255,255,.12);border-radius:6px;padding:5px 14px;font-size:9px;font-weight:700;color:#8faad8;text-align:center;line-height:1.6}
+
+/* MODAL - slides from bottom */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:none;align-items:flex-end;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto}
+.modal h3{font-size:16px;font-weight:800;color:var(--navy);margin-bottom:16px}
+.modal .flabel{margin-bottom:5px}
+.modal-body{display:flex;flex-direction:column;gap:14px}
+.modal-footer{display:flex;gap:8px;margin-top:18px}
+.modal-footer button{flex:1;padding:14px;border:none;border-radius:10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;cursor:pointer}
+.m-cancel{background:#e8ecf5;color:var(--navy)}
+.m-clear{background:#fce4ec;color:var(--red)}
+.m-save{background:var(--navy);color:#fff}
+</style>
+</head>
+<body>
+
+<!-- SETUP -->
+<div class="screen active" id="screen-setup">
+  <div class="setup-header">
+    <div class="hdr-logo">
+      <svg width="28" height="28" viewBox="0 0 52 52"><rect width="52" height="52" rx="8" fill="white"/><rect x="4" y="4" width="44" height="44" rx="6" fill="#1a2a5e"/><text x="26" y="35" font-family="Montserrat,Arial" font-weight="900" font-size="24" fill="white" text-anchor="middle">FH</text></svg>
+    </div>
+    <div>
+      <div class="hdr-title">Rotation Schedule</div>
+      <div class="hdr-sub">Farwaniya Hospital – Endocrinology</div>
+    </div>
+  </div>
+
+  <div class="setup-body">
+
+    <div class="card">
+      <div class="card-hdr">📅 Period</div>
+      <div class="card-body">
+        <div class="row2">
+          <div>
+            <span class="flabel">Month</span>
+            <select id="s-month">
+              <option value="0">January</option><option value="1">February</option><option value="2">March</option>
+              <option value="3">April</option><option value="4">May</option><option value="5">June</option>
+              <option value="6">July</option><option value="7">August</option><option value="8">September</option>
+              <option value="9">October</option><option value="10">November</option><option value="11">December</option>
+            </select>
+          </div>
+          <div>
+            <span class="flabel">Year</span>
+            <input type="number" id="s-year" value="2026" inputmode="numeric">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">👨‍⚕️ Residents</div>
+      <div class="card-body">
+        <div id="resident-list"></div>
+        <button class="add-btn" id="add-res-btn">+ Add Resident</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">👤 Consultation Week</div>
+      <div class="card-body">
+        <div id="consult-list"></div>
+        <div class="rule-note">
+          <strong>🔒 Auto-Wards Rules:</strong>
+          • Dr Nasser → Wards on Wednesday<br>
+          • Dr Shaimaa / Dr Fahad → Wards on Monday
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-hdr">⭐ Special Days</div>
+      <div class="card-body">
+        <div id="special-list"></div>
+        <button class="add-btn" id="add-sp-btn">+ Add Special Day</button>
+      </div>
+    </div>
+
+    <button class="gen-btn" id="gen-btn">🚀 Generate Schedule</button>
+
+  </div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="screen" id="screen-schedule">
+  <div class="sch-toolbar">
+    <button class="tb-btn tb-back" id="btn-back">← Edit</button>
+    <button class="tb-btn tb-png"  id="btn-png">📸 PNG</button>
+    <button class="tb-btn tb-pdf"  id="btn-pdf">📄 PDF</button>
+    <button class="tb-btn tb-print" id="btn-print">🖨️</button>
+  </div>
+  <div id="res-switcher" class="res-switcher"></div>
+  <div id="stats-row" class="stats-row"></div>
+  <div class="sch-wrap"><div id="schedule"></div></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h3 id="modal-title">Edit Cell</h3>
+    <div class="modal-body">
+      <div>
+        <span class="flabel">Activity Type</span>
+        <select id="modal-type">
+          <option value="">— Select —</option>
+          <option value="leave">🧳 Leave</option>
+          <option value="academic">🎓 Academic Day</option>
+          <option value="teaching">📖 Teaching</option>
+          <option value="presentation">🎤 Presentation</option>
+          <option value="wards">🛏️ Wards</option>
+          <option value="eid">🌙 Eid Holiday</option>
+          <option value="holiday">🏖️ Bank Holiday</option>
+          <option value="endo">🔬 Endocrine Clinic</option>
+          <option value="endodm">✳️ Endocrine & Diabetes</option>
+          <option value="dm">💉 Diabetes Clinic</option>
+          <option value="gdm">🤰 GDM Clinic</option>
+          <option value="mix">🔀 Mix Clinic</option>
+        </select>
+      </div>
+      <div id="modal-teacher-wrap" style="display:none">
+        <span class="flabel">Teaching by (Consultant)</span>
+        <input type="text" id="modal-teacher" placeholder="e.g. Dr Fatema">
+      </div>
+      <div>
+        <span class="flabel" id="modal-doc-label">Doctor / Label</span>
+        <input type="text" id="modal-doc" placeholder="e.g. Dr Naela">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="m-cancel" id="modal-cancel">Cancel</button>
+      <button class="m-clear"  id="modal-clear">Clear</button>
+      <button class="m-save"   id="modal-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ══ DATA ══ */
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const DAYS_HDR=['SUNDAY','MONDAY','TUESDAY','WEDNESDAY','THURSDAY'];
+const WK_STYLES=[
+  {bg:'#f0eeff',lc:'#6c3483'},{bg:'#eafaf1',lc:'#1e8449'},
+  {bg:'#eaf4fb',lc:'#1a5276'},{bg:'#fef9e7',lc:'#d68910'},
+  {bg:'#fdedec',lc:'#c0392b'}
+];
+const CLINIC_SLOTS={
+  0:[{doc:'Dr Naela',type:'endodm',cn:'Endocrine & Diabetes Clinic'},{doc:'Dr Salsabeel',type:'endodm',cn:'Endocrine & Diabetes Clinic'},{doc:'Dr Nasser',type:'endo',cn:'Endocrine Clinic'}],
+  1:[{doc:'Dr Fatema',type:'endodm',cn:'Endocrine & Diabetes Clinic'},{doc:'Dr Nour',type:'endo',cn:'Endocrine Clinic'},{doc:'Dr M. Hussain',type:'dm',cn:'Diabetes Clinic'}],
+  2:[{doc:'Dr Buthina',type:'dm',cn:'Diabetes Clinic'},{doc:'Dr Nasser',type:'dm',cn:'Diabetes Clinic'},{doc:'Dr Nour',type:'dm',cn:'Diabetes Clinic'}],
+  3:[{doc:'GDM Clinic',type:'gdm',cn:'GDM Clinic'},{doc:'Dr Fahad',type:'endo',cn:'Endocrine Clinic'},{doc:'Dr Salsabeel',type:'mix',cn:'Mix Clinic'}],
+  4:[{doc:'Dr Fahad',type:'endo',cn:'Endocrine Clinic'},{doc:'Dr M. Hussain',type:'endo',cn:'Endocrine Clinic'}]
+};
+const TYPE_CN={leave:'Leave',academic:'Academic Day',teaching:'Teaching',presentation:'Presentation',wards:'Wards',eid:'Eid Holiday',holiday:'Bank Holiday',endo:'Endocrine Clinic',endodm:'Endocrine & Diabetes Clinic',dm:'Diabetes Clinic',gdm:'GDM Clinic',mix:'Mix Clinic'};
+const CONSULT_WARDS={nasser:{dow:3},shaimaa:{dow:1},fahad:{dow:1}};
+const SP_TYPES=['leave','academic','teaching','presentation','wards','eid','holiday'];
+const RES_COLORS=['#1a5276','#1e8449','#c0392b','#6c3483','#d68910','#0e6655'];
+
+/* ══ STATE ══ */
+let residents=[], specials=[], consultants={}, schedules={};
+let weeks=[], activeResId=null, editKey=null, editResId=null;
+let ridSeq=0, spSeq=0;
+
+/* ══ ICONS ══ */
+function ico(type,s=26){
+  const c={leave:'#6c3483',academic:'#1e8449',teaching:'#c0392b',presentation:'#c0392b',wards:'#0e6655',endo:'#1a2a5e',endodm:'#1a2a5e',dm:'#1a2a5e',gdm:'#0e6655',mix:'#6c3483',eid:'#d68910',holiday:'#d68910'};
+  const icons={
+    leave:`<svg width="${s}" height="${s}" viewBox="0 0 28 28" fill="none"><rect x="4" y="8" width="20" height="15" rx="2" stroke="${c.leave}" stroke-width="2"/><path d="M9 8V6a5 5 0 0110 0v2" stroke="${c.leave}" stroke-width="2"/><line x1="4" y1="14" x2="24" y2="14" stroke="${c.leave}" stroke-width="2"/><line x1="11" y1="11" x2="11" y2="17" stroke="${c.leave}" stroke-width="2"/><line x1="17" y1="11" x2="17" y2="17" stroke="${c.leave}" stroke-width="2"/></svg>`,
+    academic:`<svg width="${s}" height="${s}" viewBox="0 0 28 28" fill="none"><path d="M4 11l10-6 10 6-10 6-10-6z" stroke="${c.academic}" stroke-width="2" stroke-linejoin="round"/><path d="M8 13.5V20c2 1.5 8 1.5 12 0v-6.5" stroke="${c.academic}" stroke-width="2"/><line x1="24" y1="11" x2="24" y2="18" stroke="${c.academic}" stroke-width="2"/></svg>`,
+    teaching:`<svg width="${s}" height="${s}" viewBox="0 0 28 28" fill="none"><rect x="3" y="4" width="10" height="13" rx="1" stroke="${c.teaching}" stroke-width="2"/><rect x="15" y="4" width="10" height="13" rx="1" stroke="${c.teaching}" stroke-width="2"/><line x1="6" y1="8" x2="10" y2="8" stroke="${c.teaching}" stroke-width="1.5"/><line x1="6" y1="11" x2="10" y2="11" stroke="${c.teaching}" stroke-width="1.5"/><line x1="18" y1="8" x2="22" y2="8" stroke="${c.teaching}" stroke-width="1.5"/><line x1="18" y1="11" x2="22" y2="11" stroke="${c.teaching}" stroke-width="1.5"/></svg>`,
+    presentation:`<svg width="${s}" height="${s}" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="8" r="4" stroke="${c.presentation}" stroke-width="2"/><path d="M6 24c0-4 3.6-7 8-7s8 3 8 7" stroke="${c.presentation}" stroke-width="2"/><circle cx="14" cy="8" r="1.5" fill="${c.presentation}"/></svg>`,
+    wards:`<svg width="${s}" height="${s}" viewBox="0 0 28 28" fill="none"><rect x="3" y="12" width="22" height="10" rx="2" stroke="${c.wards}" stroke-width="2"/><path d="M7 12V9a4 4 0 018 0v3" stroke="${c.wards}" stroke-width="2"/><line x1="3" y1="17" x2="25" y2="17" stroke="${c.wards}" stroke-width="1.5"/><circle cx="7" cy="25" r="2" fill="${c.wards}"/><circle cx="21" cy="25" r="2" fill="${c.wards}"/></svg>`,
+    endo:`<svg width="${s}" height="${s}" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="4" stroke="#1a2a5e" stroke-width="2"/><circle cx="14" cy="14" r="1.5" fill="#1a2a5e"/><line x1="14" y1="4" x2="14" y2="8" stroke="#1a2a5e" stroke-width="2"/><line x1="14" y1="20" x2="14" y2="24" stroke="#1a2a5e" stroke-width="2"/><line x1="4" y1="14" x2="8" y2="14" stroke="#1a2a5e" stroke-width="2"/><line x1="20" y1="14" x2="24" y2="14" stroke="#1a2a5e" stroke-width="2"/><line x1="7" y1="7" x2="10" y2="10" stroke="#1a2a5e" stroke-width="1.5"/><line x1="18" y1="18" x2="21" y2="21" stroke="#1a2a5e" stroke-width="1.5"/><line x1="21" y1="7" x2="18" y2="10" stroke="#1a2a5e" stroke-width="1.5"/><line x1="10" y1="18" x2="7" y2="21" stroke="#1a2a5e" stroke-width="1.5"/></svg>`,
+    dm:`<svg width="${s}" height="${s}" viewBox="0 0 28 28" fill="none"><circle cx="14" cy="14" r="9" stroke="#1a2a5e" stroke-width="2"/><circle cx="14" cy="14" r="5" fill="#c0392b"/><circle cx="14" cy="14" r="2" fill="#fff"/></svg>`,
+    endodm:`<svg width="${s}" height="${s}" viewBox="0 0 28 28" fill="none"><circle cx="10" cy="14" r="4" stroke="#1a2a5e" stroke-width="2"/><circle cx="10" cy="14" r="1.5" fill="#1a2a5e"/><line x1="10" y1="4" x2="10" y2="8" stroke="#1a2a5e" stroke-width="2"/><line x1="10" y1="20" x2="10" y2="24" stroke="#1a2a5e" stroke-width="2"/><line x1="2" y1="14" x2="6" y2="14" stroke="#1a2a5e" stroke-width="2"/><line x1="14" y1="14" x2="18" y2="14" stroke="#1a2a5e" stroke-width="2"/><circle cx="21" cy="14" r="5" fill="#c0392b"/><circle cx="21" cy="14" r="2" fill="#fff"/></svg>`,
+    gdm:`<svg width="${s}" height="${s}" viewBox="0 0 28 28" fill="none"><ellipse cx="14" cy="17" rx="7" ry="8" stroke="#0e6655" stroke-width="2"/><circle cx="14" cy="8" r="4" stroke="#0e6655" stroke-width="2"/></svg>`,
+    mix:`<svg width="${s}" height="${s}" viewBox="0 0 28 28"><text y="22" font-size="20">🔀</text></svg>`,
+    eid:`<svg width="${s}" height="${s}" viewBox="0 0 28 28"><text y="22" font-size="20">🌙</text></svg>`,
+    holiday:`<svg width="${s}" height="${s}" viewBox="0 0 28 28"><text y="22" font-size="20">🏖️</text></svg>`,
+  };
+  return icons[type]||`<svg width="${s}" height="${s}" viewBox="0 0 28 28"><text y="20" font-size="14">?</text></svg>`;
+}
+const FH_LOGO=`<svg width="52" height="52" viewBox="0 0 52 52" fill="none"><rect width="52" height="52" rx="8" fill="white"/><rect x="4" y="4" width="44" height="44" rx="6" fill="#1a2a5e"/><text x="26" y="35" font-family="Montserrat,Arial" font-weight="900" font-size="24" fill="white" text-anchor="middle">FH</text></svg>`;
+const CONSULT_ICO=`<svg viewBox="0 0 20 20" fill="none"><circle cx="10" cy="6" r="4" stroke="#1a2a5e" stroke-width="1.5"/><path d="M3 18c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="#1a2a5e" stroke-width="1.5"/></svg>`;
+
+/* ══ INIT ══ */
+document.addEventListener('DOMContentLoaded', function(){
+  const now=new Date();
+  document.getElementById('s-month').value=now.getMonth();
+  document.getElementById('s-year').value=now.getFullYear();
+
+  // Add default resident
+  addResident();
+
+  // Update consult when month/year changes
+  document.getElementById('s-month').addEventListener('change', function(){ renderConsultList(); });
+  document.getElementById('s-year').addEventListener('change', function(){ renderConsultList(); });
+
+  // Buttons
+  document.getElementById('add-res-btn').addEventListener('click', addResident);
+  document.getElementById('add-sp-btn').addEventListener('click', addSpecial);
+  document.getElementById('gen-btn').addEventListener('click', generate);
+  document.getElementById('btn-back').addEventListener('click', function(){ showScreen('setup'); });
+  document.getElementById('btn-png').addEventListener('click', exportPNG);
+  document.getElementById('btn-pdf').addEventListener('click', exportPDF);
+  document.getElementById('btn-print').addEventListener('click', function(){ window.print(); });
+  document.getElementById('modal-cancel').addEventListener('click', closeModal);
+  document.getElementById('modal-clear').addEventListener('click', clearCell);
+  document.getElementById('modal-save').addEventListener('click', saveCell);
+  document.getElementById('modal-type').addEventListener('change', modalTypeChange);
+  document.getElementById('modal-bg').addEventListener('click', function(e){ if(e.target===this)closeModal(); });
+
+  renderConsultList();
+});
+
+/* ══ SCREENS ══ */
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(function(s){ s.classList.remove('active'); });
+  document.getElementById('screen-'+name).classList.add('active');
+}
+
+/* ══ RESIDENTS ══ */
+function addResident(){
+  ridSeq++;
+  const id=ridSeq;
+  const color=RES_COLORS[(residents.length)%RES_COLORS.length];
+  residents.push({id:id,name:'',level:'R1',color:color});
+  renderResidentList();
+  renderConsultList();
+}
+function removeResident(id){
+  residents=residents.filter(function(r){return r.id!==id;});
+  renderResidentList();
+  renderConsultList();
+}
+function renderResidentList(){
+  var el=document.getElementById('resident-list');
+  el.innerHTML='';
+  residents.forEach(function(r){
+    var div=document.createElement('div');
+    div.className='res-card';
+    div.innerHTML=
+      '<div class="res-row1">'+
+        '<input class="res-name" type="text" placeholder="Full name e.g. Dr Humoud" value="'+escH(r.name)+'" data-rid="'+r.id+'">'+
+        '<button class="del-btn" data-rid="'+r.id+'" data-action="del-res">✕</button>'+
+      '</div>'+
+      '<div class="res-row2">'+
+        '<select class="res-level" data-rid="'+r.id+'">'+
+          ['R1','R2','R3','R4','R5'].map(function(l){return'<option'+(r.level===l?' selected':'')+'>'+l+'</option>';}).join('')+
+        '</select>'+
+        '<div class="color-pick" style="background:'+r.color+'" data-rid="'+r.id+'">'+
+          '<input type="color" value="'+r.color+'" data-rid="'+r.id+'" data-action="color">'+
+        '</div>'+
+      '</div>';
+    el.appendChild(div);
+  });
+
+  // Bind events directly (no inline handlers)
+  el.querySelectorAll('.res-name').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      var rid=parseInt(this.getAttribute('data-rid'));
+      var res=residents.find(function(r){return r.id===rid;});
+      if(res) res.name=this.value;
+    });
+  });
+  el.querySelectorAll('.res-level').forEach(function(sel){
+    sel.addEventListener('change', function(){
+      var rid=parseInt(this.getAttribute('data-rid'));
+      var res=residents.find(function(r){return r.id===rid;});
+      if(res) res.level=this.value;
+    });
+  });
+  el.querySelectorAll('input[data-action="color"]').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      var rid=parseInt(this.getAttribute('data-rid'));
+      var res=residents.find(function(r){return r.id===rid;});
+      if(res){
+        res.color=this.value;
+        this.parentElement.style.background=this.value;
+      }
+    });
+  });
+  el.querySelectorAll('[data-action="del-res"]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      removeResident(parseInt(this.getAttribute('data-rid')));
+    });
+  });
+}
+
+/* ══ CALENDAR ══ */
+function getWeeks(){
+  var month=parseInt(document.getElementById('s-month').value);
+  var year=parseInt(document.getElementById('s-year').value);
+  var dow1=new Date(year,month,1).getDay();
+  var wks=[]; var cur=new Date(year,month,1-dow1);
+  while(true){
+    var w={days:[]}; var hasM=false;
+    for(var d=0;d<5;d++){
+      var inM=cur.getMonth()===month&&cur.getFullYear()===year;
+      w.days.push({date:cur.getDate(),inMonth:inM,dow:d,month:cur.getMonth()});
+      if(inM)hasM=true;
+      cur=new Date(cur.getFullYear(),cur.getMonth(),cur.getDate()+1);
+    }
+    cur=new Date(cur.getFullYear(),cur.getMonth(),cur.getDate()+2);
+    if(hasM)wks.push(w);
+    if((cur.getMonth()>month&&cur.getFullYear()>=year)||cur.getFullYear()>year||wks.length>6)break;
+  }
+  return wks;
+}
+function wkLabel(week){
+  var mn=MONTHS[parseInt(document.getElementById('s-month').value)];
+  var days=week.days.filter(function(d){return d.inMonth;});
+  if(!days.length)return'';
+  var f=days[0],l=days[days.length-1];
+  var fL=f.inMonth?mn.slice(0,3)+' '+f.date:MONTHS[f.month].slice(0,3)+' '+f.date;
+  return fL+' – '+mn.slice(0,3)+' '+l.date;
+}
+
+/* ══ CONSULT ══ */
+function renderConsultList(){
+  var wks=getWeeks();
+  var el=document.getElementById('consult-list');
+  el.innerHTML='';
+  wks.forEach(function(_, wi){
+    var row=document.createElement('div');
+    row.className='consult-row';
+    row.innerHTML='<span class="wk-badge">W'+(wi+1)+'</span><input type="text" placeholder="Consultant name…" value="'+escH(consultants[wi]||'')+'" data-wi="'+wi+'">';
+    el.appendChild(row);
+  });
+  el.querySelectorAll('input').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      consultants[parseInt(this.getAttribute('data-wi'))]=this.value;
+    });
+  });
+}
+
+/* ══ SPECIALS ══ */
+function addSpecial(){
+  spSeq++;
+  specials.push({id:spSeq,date:'',resId:'all',type:'leave',doc:'',teacher:''});
+  renderSpecialList();
+}
+function removeSpecial(id){
+  specials=specials.filter(function(s){return s.id!==id;});
+  renderSpecialList();
+}
+function renderSpecialList(){
+  var el=document.getElementById('special-list');
+  el.innerHTML='';
+  if(!specials.length){
+    el.innerHTML='<div style="color:#aaa;font-size:13px;text-align:center;padding:8px">No special days. Tap + to add.</div>';
+    return;
+  }
+  specials.forEach(function(s){
+    var div=document.createElement('div');
+    div.className='sp-card';
+    div.innerHTML=
+      '<div class="sp-row">'+
+        '<input class="sp-date" type="text" inputmode="numeric" placeholder="Day" value="'+escH(s.date)+'" data-spid="'+s.id+'">'+
+        '<select class="sp-type" data-spid="'+s.id+'">'+
+          SP_TYPES.map(function(t){return'<option value="'+t+'"'+(s.type===t?' selected':'')+'>'+TYPE_CN[t]+'</option>';}).join('')+
+        '</select>'+
+        '<button class="del-btn" data-spid="'+s.id+'" data-action="del-sp">✕</button>'+
+      '</div>'+
+      '<div class="sp-teacher'+(s.type==='teaching'?' show':'')+'" data-spid="'+s.id+'">'+
+        '<input type="text" placeholder="Teaching by (consultant)" value="'+escH(s.teacher||'')+'" data-spid="'+s.id+'" data-field="teacher">'+
+      '</div>'+
+      '<select data-spid="'+s.id+'" data-field="resId">'+
+        '<option value="all">All residents</option>'+
+        residents.map(function(r){return'<option value="'+r.id+'"'+(s.resId==r.id?' selected':'')+'>'+escH(r.name||'Resident '+r.id)+'</option>';}).join('')+
+      '</select>';
+    el.appendChild(div);
+  });
+
+  el.querySelectorAll('.sp-date').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      var sp=specials.find(function(s){return s.id==this.getAttribute('data-spid');},this);
+      if(sp) sp.date=this.value;
+    });
+  });
+  el.querySelectorAll('.sp-type').forEach(function(sel){
+    sel.addEventListener('change', function(){
+      var sp=specials.find(function(s){return s.id==this.getAttribute('data-spid');},this);
+      if(sp){ sp.type=this.value; renderSpecialList(); }
+    });
+  });
+  el.querySelectorAll('input[data-field="teacher"]').forEach(function(inp){
+    inp.addEventListener('input', function(){
+      var sp=specials.find(function(s){return s.id==this.getAttribute('data-spid');},this);
+      if(sp) sp.teacher=this.value;
+    });
+  });
+  el.querySelectorAll('select[data-field="resId"]').forEach(function(sel){
+    sel.addEventListener('change', function(){
+      var sp=specials.find(function(s){return s.id==this.getAttribute('data-spid');},this);
+      if(sp) sp.resId=this.value;
+    });
+  });
+  el.querySelectorAll('[data-action="del-sp"]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      removeSpecial(parseInt(this.getAttribute('data-spid')));
+    });
+  });
+}
+
+/* ══ GENERATE ══ */
+function generate(){
+  weeks=getWeeks();
+  schedules={};
+  residents.forEach(function(r){ schedules[r.id]={}; });
+
+  var spMap={};
+  specials.forEach(function(s){
+    var d=parseInt(s.date); if(!d)return;
+    if(!spMap[d])spMap[d]=[];
+    spMap[d].push(s);
+  });
+
+  var slotOff={};
+  residents.forEach(function(r){ slotOff[r.id]={}; for(var d=0;d<5;d++) slotOff[r.id][d]=0; });
+  var clinicCount={};
+  residents.forEach(function(r){ clinicCount[r.id]=0; });
+
+  weeks.forEach(function(week,wi){
+    var cRaw=(consultants[wi]||'').toLowerCase().trim();
+    var wardsRule=null;
+    Object.keys(CONSULT_WARDS).forEach(function(k){ if(cRaw.indexOf(k)>=0) wardsRule=CONSULT_WARDS[k]; });
+
+    residents.forEach(function(res,ri){
+      for(var d=0;d<5;d++){
+        var slots=CLINIC_SLOTS[d]||[];
+        if(slots.length>1) slotOff[res.id][d]=(wi+ri)%slots.length;
+      }
+    });
+
+    week.days.forEach(function(day,di){
+      if(!day.inMonth)return;
+      var taken=new Set();
+
+      residents.forEach(function(res){
+        var key=wi+'-'+di;
+        // Special?
+        var sp=spMap[day.date];
+        if(sp){
+          var match=null;
+          sp.forEach(function(s){ if(!match&&(s.resId==='all'||s.resId==res.id)) match=s; });
+          if(match){ schedules[res.id][key]={type:match.type,cn:TYPE_CN[match.type]||match.type,doc:match.doc||'',teacher:match.teacher||''}; return; }
+        }
+        // Wards rule?
+        if(wardsRule&&di===wardsRule.dow){ schedules[res.id][key]={type:'wards',cn:'Wards',doc:'',teacher:''}; return; }
+        // Auto clinic
+        var slots=CLINIC_SLOTS[di]||[]; if(!slots.length)return;
+        var chosen=null;
+        for(var a=0;a<slots.length;a++){
+          var idx=(slotOff[res.id][di]+a)%slots.length;
+          var slot=slots[idx];
+          if(!taken.has(slot.doc)){ chosen=slot; taken.add(slot.doc); break; }
+        }
+        if(!chosen)return;
+        schedules[res.id][key]={type:chosen.type,cn:chosen.cn,doc:chosen.doc,teacher:''};
+        clinicCount[res.id]++;
+      });
+    });
+  });
+
+  activeResId=residents[0]?residents[0].id:null;
+  showScreen('schedule');
+  buildResSwitcher();
+  renderStats(clinicCount);
+  renderSchedule();
+}
+
+/* ══ SWITCHER ══ */
+function buildResSwitcher(){
+  var el=document.getElementById('res-switcher');
+  el.innerHTML='';
+  residents.forEach(function(r){
+    var btn=document.createElement('button');
+    btn.className='res-switch-btn'+(r.id===activeResId?' active':'');
+    btn.textContent=(r.name||'Resident')+' '+r.level;
+    btn.style.cssText=r.id===activeResId?'background:'+r.color+';color:#fff;border-color:'+r.color:'border-color:'+r.color+';color:'+r.color;
+    btn.addEventListener('click', function(){
+      activeResId=r.id;
+      buildResSwitcher();
+      renderSchedule();
+    });
+    el.appendChild(btn);
+  });
+}
+function renderStats(cc){
+  var el=document.getElementById('stats-row');
+  el.innerHTML='';
+  residents.forEach(function(r){
+    var chip=document.createElement('div');
+    chip.className='stat-chip';
+    chip.style.cssText='border-color:'+r.color+';color:'+r.color;
+    chip.textContent=(r.name||'Resident')+' '+r.level+': '+(cc[r.id]||0)+' clinics';
+    el.appendChild(chip);
+  });
+}
+
+/* ══ RENDER SCHEDULE ══ */
+function renderSchedule(){
+  var res=residents.find(function(r){return r.id===activeResId;});
+  if(!res){document.getElementById('schedule').innerHTML='';return;}
+  var month=parseInt(document.getElementById('s-month').value);
+  var year=parseInt(document.getElementById('s-year').value);
+  var rs=schedules[res.id]||{};
+  var isClinicType=function(t){return['endo','endodm','dm','gdm','mix'].indexOf(t)>=0;};
+
+  var html='<div class="sch">'+
+  '<div class="sch-hdr">'+
+    '<div>'+
+      '<div class="sch-hdr-subtitle">Endocrinology Rotation Schedule</div>'+
+      '<div class="sch-hdr-name">'+escH(res.name||'Resident')+'&nbsp;<span class="sch-badge">'+escH(res.level)+'</span></div>'+
+      '<div class="sch-hdr-month">📅 '+MONTHS[month].toUpperCase()+' '+year+'</div>'+
+    '</div>'+
+    '<div class="sch-logo">'+
+      '<div style="text-align:right">'+
+        '<div class="logo-ar">مستشفى الفروانية</div>'+
+        '<div class="logo-en">FARWANIYA HOSPITAL</div>'+
+        '<div class="logo-dept">Department of Diabetes,<br>Endocrinology &amp; Metabolism</div>'+
+      '</div>'+
+      '<div class="logo-icon">'+FH_LOGO+'</div>'+
+    '</div>'+
+  '</div>'+
+  '<div class="sch-legend">'+
+    '<div class="leg-item leg-t">'+ico('teaching',18)+' TEACHING</div>'+
+    '<div class="leg-item leg-p">'+ico('presentation',18)+' PRESENTATION</div>'+
+    '<div class="leg-item leg-a">'+ico('academic',18)+' ACADEMIC DAY</div>'+
+    '<div class="leg-item leg-w">'+ico('wards',18)+' WARDS</div>'+
+    '<div class="leg-item leg-l">'+ico('leave',18)+' LEAVE</div>'+
+  '</div>'+
+  '<div class="sch-grid">'+
+    '<div class="col-hdr"></div>'+
+    DAYS_HDR.map(function(d){return'<div class="col-hdr">'+d+'</div>';}).join('');
+
+  weeks.forEach(function(week,wi){
+    var st=WK_STYLES[wi]||WK_STYLES[4];
+    html+='<div class="wk-lbl" style="background:'+st.bg+';color:'+st.lc+'"><span class="wn">WEEK '+(wi+1)+'</span><span class="wd">'+wkLabel(week)+'</span></div>';
+
+    week.days.forEach(function(day,di){
+      var bg=day.inMonth?st.bg+'bb':'#f5f5f5';
+      if(!day.inMonth){html+='<div class="cell greyed"><div class="day-n" style="color:#ccc">'+day.date+'</div></div>';return;}
+      var key=wi+'-'+di;
+      var e=rs[key];
+      if(!e){html+='<div class="cell" style="background:'+bg+'" data-key="'+key+'" data-resid="'+res.id+'" data-date="'+day.date+'"><div class="day-n">'+day.date+'</div></div>';return;}
+      var isCl=isClinicType(e.type);
+      var cellContent='<div class="day-n">'+day.date+'</div><div class="cell-body">'+ico(e.type,26);
+      if(e.type==='teaching'){
+        cellContent+='<span class="c-activity">Teaching</span>'+(e.teacher?'<span class="c-doctor">'+escH(e.teacher)+'</span>':'');
+      } else if(isCl){
+        cellContent+='<span class="c-clinic">'+escH(e.cn)+'</span><span class="c-doctor">'+escH(e.doc)+'</span>';
+      } else {
+        cellContent+='<span class="c-activity">'+escH(e.cn)+'</span>'+(e.doc?'<span class="c-doctor">'+escH(e.doc)+'</span>':'');
+      }
+      cellContent+='</div>';
+      html+='<div class="cell t-'+e.type+'" style="background:'+bg+'" data-key="'+key+'" data-resid="'+res.id+'" data-date="'+day.date+'">'+cellContent+'</div>';
+    });
+
+    var c=consultants[wi]||'—';
+    html+='<div class="cb cb-w'+(wi%5)+'">'+CONSULT_ICO+'<span class="cb-lbl">Consultation Week:</span><span class="cb-name">DR '+escH(c.toUpperCase())+'</span></div>';
+  });
+
+  html+='</div>'+
+  '<div class="sch-footer">'+
+    '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'+
+      '<span style="font-size:9px;font-weight:800;color:#8faad8">CLINICS</span>'+
+      '<div class="fi">'+ico('endodm',12)+' Endocrine &amp; Diabetes</div>'+
+      '<div class="fi">'+ico('endo',12)+' Endocrine</div>'+
+      '<div class="fi">'+ico('dm',12)+' Diabetes</div>'+
+      '<div class="fi">'+ico('gdm',12)+' GDM</div>'+
+      '<div class="fi">'+ico('wards',12)+' Wards</div>'+
+    '</div>'+
+    '<div style="display:flex;gap:5px;flex-wrap:wrap;align-items:center">'+
+      '<span style="font-size:9px;font-weight:800;color:#8faad8">ACTIVITIES</span>'+
+      '<div class="fi" style="color:#ffaaaa">'+ico('teaching',12)+' Teaching</div>'+
+      '<div class="fi" style="color:#ffaaaa">'+ico('presentation',12)+' Presentation</div>'+
+      '<div class="fi" style="color:#aaffcc">'+ico('academic',12)+' Academic</div>'+
+      '<div class="fi">'+ico('leave',12)+' Leave</div>'+
+    '</div>'+
+    '<div class="fv">VERSION 1.0<br>'+MONTHS[month]+' '+year+'</div>'+
+  '</div></div>';
+
+  var el=document.getElementById('schedule');
+  el.innerHTML=html;
+
+  // Bind cell clicks
+  el.querySelectorAll('.cell[data-key]').forEach(function(cell){
+    cell.addEventListener('click', function(){
+      openModal(this.getAttribute('data-key'), this.getAttribute('data-date'), parseInt(this.getAttribute('data-resid')));
+    });
+  });
+}
+
+/* ══ MODAL ══ */
+function openModal(key,date,resId){
+  editKey=key; editResId=resId;
+  document.getElementById('modal-title').textContent='Edit – Day '+date;
+  var e=(schedules[resId]||{})[key];
+  document.getElementById('modal-type').value=e?e.type:'';
+  document.getElementById('modal-doc').value=e?e.doc:'';
+  document.getElementById('modal-teacher').value=e?e.teacher:'';
+  modalTypeChange();
+  document.getElementById('modal-bg').classList.add('open');
+}
+function closeModal(){document.getElementById('modal-bg').classList.remove('open');}
+function modalTypeChange(){
+  var t=document.getElementById('modal-type').value;
+  document.getElementById('modal-teacher-wrap').style.display=t==='teaching'?'block':'none';
+  document.getElementById('modal-doc-label').textContent=t==='teaching'?'Extra Label':'Doctor / Clinic';
+}
+function saveCell(){
+  var type=document.getElementById('modal-type').value;
+  if(!type){closeModal();return;}
+  var doc=document.getElementById('modal-doc').value.trim();
+  var teacher=document.getElementById('modal-teacher').value.trim();
+  if(!schedules[editResId])schedules[editResId]={};
+  schedules[editResId][editKey]={type:type,cn:TYPE_CN[type]||type,doc:doc,teacher:teacher};
+  closeModal();
+  renderSchedule();
+}
+function clearCell(){
+  if(schedules[editResId])delete schedules[editResId][editKey];
+  closeModal();
+  renderSchedule();
+}
+
+/* ══ EXPORT ══ */
+async function exportPNG(){
+  var el=document.getElementById('schedule').firstElementChild;
+  var c=await html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true});
+  var a=document.createElement('a');
+  var res=residents.find(function(r){return r.id===activeResId;});
+  a.download='schedule-'+(res?res.name:'res').replace(/\s+/g,'-')+'.png';
+  a.href=c.toDataURL('image/png');a.click();
+}
+async function exportPDF(){
+  var jsPDF=window.jspdf.jsPDF;
+  var el=document.getElementById('schedule').firstElementChild;
+  var c=await html2canvas(el,{scale:2,backgroundColor:'#fff',useCORS:true});
+  var pdf=new jsPDF({orientation:'landscape',unit:'mm',format:'a4'});
+  var w=pdf.internal.pageSize.getWidth();
+  pdf.addImage(c.toDataURL('image/png'),'PNG',0,0,w,(c.height/c.width)*w);
+  var res=residents.find(function(r){return r.id===activeResId;});
+  pdf.save('schedule-'+(res?res.name:'res').replace(/\s+/g,'-')+'.pdf');
+}
+
+function escH(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+</script>
+</body>
+</html>
